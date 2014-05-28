@@ -99,8 +99,6 @@ public final class TomcatContainerRegistration extends AbstractComponent impleme
     private final Set<Connector> httpConnectors = new LinkedHashSet<Connector>();
     private final Set<Connector> httpsConnectors = new LinkedHashSet<Connector>();
 
-    private Server server;
-
     @Activate
     void activate() {
         activateInternal();
@@ -113,12 +111,11 @@ public final class TomcatContainerRegistration extends AbstractComponent impleme
     }
 
     private void activateInternal() {
+        String karafName = getKarafName();
         RuntimeProperties sysprops = runtimeProperties.get();
-        String karafName = sysprops.getProperty(SystemProperties.KARAF_NAME);
         String version = sysprops.getProperty("fabric.version", ZkDefs.DEFAULT_VERSION);
         String profiles = sysprops.getProperty("fabric.profiles");
         try {
-            server = getServer();
             if (profiles != null) {
                 String versionNode = CONFIG_CONTAINER.getPath(karafName);
                 String profileNode = CONFIG_VERSIONS_CONTAINER.getPath(version, karafName);
@@ -144,16 +141,13 @@ public final class TomcatContainerRegistration extends AbstractComponent impleme
             //Mostly usable for adding values when creating containers without an existing ensemble.
             for (String resolver : ZkDefs.VALID_RESOLVERS) {
                 String address = sysprops.getProperty(resolver);
-                if (address != null && !address.isEmpty() && ZooKeeperUtils.exists(curator.get(), CONTAINER_ADDRESS.getPath(karafName, resolver)) == null) {
-                    ZooKeeperUtils.setData(curator.get(), CONTAINER_ADDRESS.getPath(karafName, resolver), address);
+                String path = CONTAINER_ADDRESS.getPath(karafName, resolver);
+                if (address != null && !address.isEmpty() && ZooKeeperUtils.exists(curator.get(), path) == null) {
+                    ZooKeeperUtils.setData(curator.get(), path, address);
                 }
             }
+            registerHttp();
 
-            //We are creating a dummy container object, since this might be called before the actual container is ready.
-            Container current = getContainer();
-            //Read all tomcat connectors
-            initializeConnectors();
-            registerHttp(current);
 
             //Set the port range values
             String minimumPort = sysprops.getProperty(ZkDefs.MINIMUM_PORT);
@@ -182,9 +176,7 @@ public final class TomcatContainerRegistration extends AbstractComponent impleme
     }
 
     private void checkAlive() throws Exception {
-        RuntimeProperties sysprops = runtimeProperties.get();
-        String karafName = sysprops.getProperty(SystemProperties.KARAF_NAME);
-        String nodeAlive = CONTAINER_ALIVE.getPath(karafName);
+        String nodeAlive = CONTAINER_ALIVE.getPath(getKarafName());
         Stat stat = ZooKeeperUtils.exists(curator.get(), nodeAlive);
         if (stat != null) {
             if (stat.getEphemeralOwner() != curator.get().getZookeeperClient().getZooKeeper().getSessionId()) {
@@ -201,7 +193,16 @@ public final class TomcatContainerRegistration extends AbstractComponent impleme
         return (Server) mbeanServer.get().getAttribute(name, "managedResource");
     }
 
-    private void initializeConnectors() {
+    private void registerHttp() throws Exception {
+        //We are creating a dummy container object, since this might be called before the actual container is ready.
+        Container current = getContainer();
+        initializeCatalinaConnectors();
+        String httpUrl = getHttpUrl(current);
+        ZooKeeperUtils.setData(curator.get(), CONTAINER_HTTP.getPath(current.getId()), httpUrl);
+    }
+
+    private void initializeCatalinaConnectors() throws MalformedObjectNameException, AttributeNotFoundException, MBeanException, ReflectionException, InstanceNotFoundException {
+        Server server = getServer();
         org.apache.catalina.Service[] services = server.findServices();
         for (org.apache.catalina.Service service : services) {
             for (Connector connector : service.findConnectors()) {
@@ -215,13 +216,11 @@ public final class TomcatContainerRegistration extends AbstractComponent impleme
     }
 
 
-    private void registerHttp(Container container) throws Exception {
-        boolean httpEnabled = isHttpEnabled();
-        boolean httpsEnabled = isHttpsEnabled();
-        String protocol = httpsEnabled && !httpEnabled ? "https" : "http";
-        int httpPort = httpsEnabled && !httpEnabled ? getHttpsPort() : getHttpPort();
-        String httpUrl = getHttpUrl(protocol, container.getId(), httpPort);
-        ZooKeeperUtils.setData(curator.get(), CONTAINER_HTTP.getPath(container.getId()), httpUrl);
+    private String getHttpUrl(Container container) throws IOException, KeeperException, InterruptedException {
+        boolean useHttps = isHttpsEnabled() && !isHttpEnabled();
+        String protocol = useHttps ? "https" : "http";
+        int httpPort = useHttps ? getHttpsPort() : getHttpPort();
+        return getHttpUrl(protocol, container.getId(), httpPort);
     }
 
     private boolean isHttpEnabled() throws IOException {
@@ -259,11 +258,15 @@ public final class TomcatContainerRegistration extends AbstractComponent impleme
     private String getGlobalResolutionPolicy(RuntimeProperties sysprops, CuratorFramework zooKeeper) throws Exception {
         String policy = ZkDefs.LOCAL_HOSTNAME;
         List<String> validResolverList = Arrays.asList(ZkDefs.VALID_RESOLVERS);
-        if (ZooKeeperUtils.exists(zooKeeper, ZkPath.POLICIES.getPath(ZkDefs.RESOLVER)) != null) {
-            policy = ZooKeeperUtils.getStringData(zooKeeper, ZkPath.POLICIES.getPath(ZkDefs.RESOLVER));
-        } else if (sysprops.getProperty(ZkDefs.GLOBAL_RESOLVER_PROPERTY) != null && validResolverList.contains(sysprops.getProperty(ZkDefs.GLOBAL_RESOLVER_PROPERTY))) {
-            policy = sysprops.getProperty(ZkDefs.GLOBAL_RESOLVER_PROPERTY);
-            ZooKeeperUtils.setData(zooKeeper, ZkPath.POLICIES.getPath("resolver"), policy);
+        String resolverPolicyPath = ZkPath.POLICIES.getPath(ZkDefs.RESOLVER);
+        if (ZooKeeperUtils.exists(zooKeeper, resolverPolicyPath) != null) {
+            policy = ZooKeeperUtils.getStringData(zooKeeper, resolverPolicyPath);
+        } else {
+            String globalResolver = sysprops.getProperty(ZkDefs.GLOBAL_RESOLVER_PROPERTY);
+            if (globalResolver != null && validResolverList.contains(globalResolver)) {
+                policy = globalResolver;
+                ZooKeeperUtils.setData(zooKeeper, resolverPolicyPath, policy);
+            }
         }
         return policy;
     }
@@ -274,18 +277,22 @@ public final class TomcatContainerRegistration extends AbstractComponent impleme
     private String getContainerResolutionPolicy(RuntimeProperties sysprops, CuratorFramework zooKeeper, String container) throws Exception {
         String policy = null;
         List<String> validResolverList = Arrays.asList(ZkDefs.VALID_RESOLVERS);
-        if (ZooKeeperUtils.exists(zooKeeper, CONTAINER_RESOLVER.getPath(container)) != null) {
-            policy = ZooKeeperUtils.getStringData(zooKeeper, CONTAINER_RESOLVER.getPath(container));
-        } else if (sysprops.getProperty(ZkDefs.LOCAL_RESOLVER_PROPERTY) != null && validResolverList.contains(sysprops.getProperty(ZkDefs.LOCAL_RESOLVER_PROPERTY))) {
-            policy = sysprops.getProperty(ZkDefs.LOCAL_RESOLVER_PROPERTY);
+        String path = CONTAINER_RESOLVER.getPath(container);
+        if (ZooKeeperUtils.exists(zooKeeper, path) != null) {
+            policy = ZooKeeperUtils.getStringData(zooKeeper, path);
+        } else {
+            String localResolver = sysprops.getProperty(ZkDefs.LOCAL_RESOLVER_PROPERTY);
+            if (localResolver != null && validResolverList.contains(localResolver)) {
+                policy = localResolver;
+            }
         }
 
         if (policy == null) {
             policy = getGlobalResolutionPolicy(sysprops, zooKeeper);
         }
 
-        if (policy != null && ZooKeeperUtils.exists(zooKeeper, CONTAINER_RESOLVER.getPath(container)) == null) {
-            ZooKeeperUtils.setData(zooKeeper, CONTAINER_RESOLVER.getPath(container), policy);
+        if (policy != null && ZooKeeperUtils.exists(zooKeeper, path) == null) {
+            ZooKeeperUtils.setData(zooKeeper, path, policy);
         }
         return policy;
     }
@@ -311,8 +318,7 @@ public final class TomcatContainerRegistration extends AbstractComponent impleme
         try {
             return fabricService.get().getCurrentContainer();
         } catch (Exception e) {
-            final RuntimeProperties sysprops = runtimeProperties.get();
-            final String karafName = sysprops.getProperty(SystemProperties.KARAF_NAME);
+            final String karafName = getKarafName();
             return new ContainerImpl(null, karafName, null) {
                 @Override
                 public String getIp() {
@@ -324,6 +330,10 @@ public final class TomcatContainerRegistration extends AbstractComponent impleme
                 }
             };
         }
+    }
+
+    private String getKarafName() {
+        return runtimeProperties.get().getProperty(SystemProperties.KARAF_NAME);
     }
 
     void bindMBeanServer(MBeanServer mbeanServer) {
