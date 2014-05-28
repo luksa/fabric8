@@ -353,11 +353,11 @@ public abstract class AbstractDataStore<T extends DataStore> extends AbstractCom
             // If no resolver specified but a resolver is already present in the registry, use the registry value
             String resolver = metadata.getOverridenResolver() != null ? metadata.getOverridenResolver() : options.getResolver();
 
-            if (resolver == null && exists(getCurator(), ZkPath.CONTAINER_RESOLVER.getPath(containerId)) != null) {
+            if (resolver == null && exists(getCurator(), ZkPath.CONTAINER_RESOLVER.getPath(containerId))) {
                 resolver = getStringData(getCurator(), ZkPath.CONTAINER_RESOLVER.getPath(containerId));
             } else if (options.getResolver() != null) {
                 // Use the resolver specified in the options and do nothing.
-            } else if (exists(getCurator(), ZkPath.POLICIES.getPath(ZkDefs.RESOLVER)) != null) {
+            } else if (exists(getCurator(), ZkPath.POLICIES.getPath(ZkDefs.RESOLVER))) {
                 // If there is a globlal resolver specified use it.
                 resolver = getStringData(getCurator(), ZkPath.POLICIES.getPath(ZkDefs.RESOLVER));
             } else {
@@ -472,7 +472,7 @@ public abstract class AbstractDataStore<T extends DataStore> extends AbstractCom
     public boolean isContainerAlive(String id) {
         assertValid();
         try {
-            return exists(getCurator(), ZkPath.CONTAINER_ALIVE.getPath(id)) != null;
+            return exists(getCurator(), ZkPath.CONTAINER_ALIVE.getPath(id));
         } catch (KeeperException.NoNodeException e) {
             return false;
         } catch (Exception e) {

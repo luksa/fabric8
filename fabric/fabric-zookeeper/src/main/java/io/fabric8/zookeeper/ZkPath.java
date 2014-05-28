@@ -247,10 +247,10 @@ public enum ZkPath {
 
         String v = version;
         //Try to find the version to use
-        if (v == null && exists(curator, CONFIG_CONTAINER.getPath(container)) != null) {
+        if (v == null && exists(curator, CONFIG_CONTAINER.getPath(container))) {
             //Try to acquire the version from the registry path /fabric/configs/containers/{container}
             v = getStringData(curator, CONFIG_CONTAINER.getPath(container));
-        }  else if (exists(curator, CONFIG_DEFAULT_VERSION.getPath()) != null) {
+        }  else if (exists(curator, CONFIG_DEFAULT_VERSION.getPath())) {
             //If version is still null, try the default version.
             v = getStringData(curator, CONFIG_DEFAULT_VERSION.getPath());
         } else {
@@ -259,12 +259,12 @@ public enum ZkPath {
         }
 
         //Set the version
-        if (exists(curator, ZkPath.CONFIG_CONTAINER.getPath(container)) == null || versionProvided) {
+        if (!exists(curator, ZkPath.CONFIG_CONTAINER.getPath(container)) || versionProvided) {
             setData(curator, ZkPath.CONFIG_CONTAINER.getPath(container), v);
         }
 
         //Set the profiles
-        if (profiles != null && !profiles.isEmpty() && exists(curator, ZkPath.CONFIG_VERSIONS_CONTAINER.getPath(v, container)) == null) {
+        if (profiles != null && !profiles.isEmpty() && !exists(curator, ZkPath.CONFIG_VERSIONS_CONTAINER.getPath(v, container))) {
             setData(curator, ZkPath.CONFIG_VERSIONS_CONTAINER.getPath(v, container), profiles);
         }
     }

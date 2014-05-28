@@ -102,7 +102,7 @@ public class CloudUtils {
                         configuration.update(dictionary);
 
                         if (curator.getZookeeperClient().isConnected()) {
-                            if (exists(curator, ZkPath.CLOUD_SERVICE.getPath(name)) == null) {
+                            if (!exists(curator, ZkPath.CLOUD_SERVICE.getPath(name))) {
                                 create(curator, ZkPath.CLOUD_SERVICE.getPath(name));
                             }
 							Enumeration keys = dictionary.keys();
@@ -166,7 +166,7 @@ public class CloudUtils {
                         configuration.update(dictionary);
 
                         if (curator.getZookeeperClient().isConnected()) {
-                            if (exists(curator, ZkPath.CLOUD_SERVICE.getPath(name)) == null) {
+                            if (!exists(curator, ZkPath.CLOUD_SERVICE.getPath(name))) {
                                 create(curator, ZkPath.CLOUD_SERVICE.getPath(name));
                             }
 

@@ -59,11 +59,11 @@ public class ExtendedCreateChildContainerTest extends FabricTestSupport {
                 for (Container c : containers) {
                     try {
                         c.destroy();
-                        Assert.assertNull(ZooKeeperUtils.exists(curator, ZkPath.CONFIG_VERSIONS_CONTAINER.getPath("1.1", c.getId())));
-                        Assert.assertNull(ZooKeeperUtils.exists(curator, ZkPath.CONFIG_VERSIONS_CONTAINER.getPath("1.0", c.getId())));
-                        Assert.assertNull(ZooKeeperUtils.exists(curator, ZkPath.CONTAINER.getPath(c.getId())));
-                        Assert.assertNull(ZooKeeperUtils.exists(curator, ZkPath.CONTAINER_DOMAINS.getPath(c.getId())));
-                        Assert.assertNull(ZooKeeperUtils.exists(curator, ZkPath.CONTAINER_PROVISION.getPath(c.getId())));
+                        Assert.assertFalse(ZooKeeperUtils.exists(curator, ZkPath.CONFIG_VERSIONS_CONTAINER.getPath("1.1", c.getId())));
+                        Assert.assertFalse(ZooKeeperUtils.exists(curator, ZkPath.CONFIG_VERSIONS_CONTAINER.getPath("1.0", c.getId())));
+                        Assert.assertFalse(ZooKeeperUtils.exists(curator, ZkPath.CONTAINER.getPath(c.getId())));
+                        Assert.assertFalse(ZooKeeperUtils.exists(curator, ZkPath.CONTAINER_DOMAINS.getPath(c.getId())));
+                        Assert.assertFalse(ZooKeeperUtils.exists(curator, ZkPath.CONTAINER_PROVISION.getPath(c.getId())));
                     } catch (Exception ex) {
                         //ignore
                     }

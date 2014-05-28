@@ -17,7 +17,6 @@ package io.fabric8.commands;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.felix.gogo.commands.Command;
-import io.fabric8.boot.commands.support.FabricCommand;
 import io.fabric8.zookeeper.ZkPath;
 import org.apache.karaf.shell.console.AbstractAction;
 
@@ -39,7 +38,7 @@ public class EncryptionAlgorithmGetAction extends AbstractAction {
 
     @Override
     protected Object doExecute() throws Exception {
-        if (exists(getCurator(), ZkPath.AUTHENTICATION_CRYPT_ALGORITHM.getPath()) != null) {
+        if (exists(getCurator(), ZkPath.AUTHENTICATION_CRYPT_ALGORITHM.getPath())) {
             System.out.println(getStringData(getCurator(), ZkPath.AUTHENTICATION_CRYPT_ALGORITHM.getPath()));
         }
         return null;

@@ -113,7 +113,7 @@ public final class ZooKeeperClusterServiceImpl extends AbstractComponent impleme
                 return Collections.emptyList();
             }
             List<String> list = new ArrayList<String>();
-            if (exists(curator.get(), ZkPath.CONFIG_ENSEMBLES.getPath()) != null) {
+            if (exists(curator.get(), ZkPath.CONFIG_ENSEMBLES.getPath())) {
                 String clusterId = getStringData(curator.get(), ZkPath.CONFIG_ENSEMBLES.getPath());
                 String containers = getStringData(curator.get(), ZkPath.CONFIG_ENSEMBLE.getPath(clusterId));
                 Collections.addAll(list, containers.split(","));
@@ -183,7 +183,7 @@ public final class ZooKeeperClusterServiceImpl extends AbstractComponent impleme
 
             for (String container : containers) {
                 Container c = fabricService.get().getContainer(container);
-                if (exists(curator.get(), ZkPath.CONTAINER_ALIVE.getPath(container)) == null) {
+                if (!exists(curator.get(), ZkPath.CONTAINER_ALIVE.getPath(container))) {
                     throw new EnsembleModificationFailed("The container " + container + " is not alive", EnsembleModificationFailed.Reason.CONTAINERS_NOT_ALIVE);
                 }
             }
@@ -251,15 +251,15 @@ public final class ZooKeeperClusterServiceImpl extends AbstractComponent impleme
                 String maximumPort = String.valueOf(Ports.MAX_PORT_NUMBER);
                 String bindAddress = "0.0.0.0";
 
-                if (exists(curator.get(), ZkPath.CONTAINER_PORT_MIN.getPath(container)) != null) {
+                if (exists(curator.get(), ZkPath.CONTAINER_PORT_MIN.getPath(container))) {
                     minimumPort = getSubstitutedPath(curator.get(), ZkPath.CONTAINER_PORT_MIN.getPath(container));
                 }
 
-                if (exists(curator.get(), ZkPath.CONTAINER_PORT_MAX.getPath(container)) != null) {
+                if (exists(curator.get(), ZkPath.CONTAINER_PORT_MAX.getPath(container))) {
                     maximumPort = getSubstitutedPath(curator.get(), ZkPath.CONTAINER_PORT_MAX.getPath(container));
                 }
 
-                if (exists(curator.get(), ZkPath.CONTAINER_BINDADDRESS.getPath(container)) != null) {
+                if (exists(curator.get(), ZkPath.CONTAINER_BINDADDRESS.getPath(container))) {
                     bindAddress = getSubstitutedPath(curator.get(), ZkPath.CONTAINER_BINDADDRESS.getPath(container));
                 }
 
@@ -348,7 +348,7 @@ public final class ZooKeeperClusterServiceImpl extends AbstractComponent impleme
                     while (!allStarted && System.currentTimeMillis() - t0 < options.getMigrationTimeout()) {
                         allStarted = true;
                         for (Container container : allContainers) {
-                            allStarted &= exists(dst, ZkPath.CONTAINER_ALIVE.getPath(container.getId())) != null;
+                            allStarted &= exists(dst, ZkPath.CONTAINER_ALIVE.getPath(container.getId()));
                         }
                         if (!allStarted) {
                             Thread.sleep(1000);

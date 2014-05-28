@@ -41,7 +41,7 @@ public class EditAction extends ZooKeeperCommandSupport {
 
     @Override
     protected void doExecute(CuratorFramework curator) throws Exception {
-        if (exists(curator, path) == null) {
+        if (!exists(curator, path)) {
             curator.create().creatingParentsIfNeeded().withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE).forPath(path);
         }
         //Call the editor

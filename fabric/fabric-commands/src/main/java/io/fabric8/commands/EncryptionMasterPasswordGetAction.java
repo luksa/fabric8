@@ -39,7 +39,7 @@ public class EncryptionMasterPasswordGetAction extends AbstractAction {
 
     @Override
     protected Object doExecute() throws Exception {
-        if (exists(getCurator(), ZkPath.AUTHENTICATION_CRYPT_PASSWORD.getPath()) != null) {
+        if (exists(getCurator(), ZkPath.AUTHENTICATION_CRYPT_PASSWORD.getPath())) {
             System.out.println(PasswordEncoder.decode(getStringData(getCurator(), ZkPath.AUTHENTICATION_CRYPT_PASSWORD.getPath())));
         }
         return null;

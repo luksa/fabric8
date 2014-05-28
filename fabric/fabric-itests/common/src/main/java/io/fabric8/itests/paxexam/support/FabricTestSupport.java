@@ -106,7 +106,7 @@ public class FabricTestSupport extends FabricKarafTestSupport {
             Thread.sleep(DEFAULT_WAIT);
             //We want to check if container exists before we actually delete them.
             //We need this because getContainer will create a container object if container doesn't exists.
-            if (ZooKeeperUtils.exists(curator, ZkPath.CONTAINER.getPath(name)) != null) {
+            if (ZooKeeperUtils.exists(curator, ZkPath.CONTAINER.getPath(name))) {
                 Container container = fabricService.getContainer(name);
                 //We want to go through container destroy method so that cleanup methods are properly invoked.
                 container.destroy();

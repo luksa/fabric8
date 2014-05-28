@@ -57,6 +57,7 @@ import static io.fabric8.zookeeper.utils.ZooKeeperUtils.create;
 import static io.fabric8.zookeeper.utils.ZooKeeperUtils.delete;
 import static io.fabric8.zookeeper.utils.ZooKeeperUtils.deleteSafe;
 import static io.fabric8.zookeeper.utils.ZooKeeperUtils.exists;
+import static io.fabric8.zookeeper.utils.ZooKeeperUtils.getStat;
 import static io.fabric8.zookeeper.utils.ZooKeeperUtils.setData;
 
 @ThreadSafe
@@ -115,7 +116,7 @@ public final class FabricMBeanRegistrationListener extends AbstractComponent imp
             String path = CONTAINER_DOMAIN.getPath((String) o, domain);
             try {
                 if (MBeanServerNotification.REGISTRATION_NOTIFICATION.equals(notification.getType())) {
-                    if (domains.add(domain) && exists(curator.get(), path) == null) {
+                    if (domains.add(domain) && !exists(curator.get(), path)) {
                         setData(curator.get(), path, "");
                     }
                 } else if (MBeanServerNotification.UNREGISTRATION_NOTIFICATION.equals(notification.getType())) {
@@ -156,7 +157,7 @@ public final class FabricMBeanRegistrationListener extends AbstractComponent imp
 
             String karafName = runtimeProperties.get().getProperty(SystemProperties.KARAF_NAME);
             String path = ZkPath.CONTAINER_PROCESS_ID.getPath(karafName);
-            Stat stat = exists(curator.get(), path);
+            Stat stat = getStat(curator.get(), path);
             if (stat != null) {
                 if (stat.getEphemeralOwner() != curator.get().getZookeeperClient().getZooKeeper().getSessionId()) {
                     delete(curator.get(), path);

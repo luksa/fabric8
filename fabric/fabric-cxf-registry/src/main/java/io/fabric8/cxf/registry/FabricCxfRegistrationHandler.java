@@ -319,7 +319,7 @@ public final class FabricCxfRegistrationHandler extends AbstractComponent implem
 
     protected void removeZkPath(String path) throws Exception {
         CuratorFramework curator = this.curator.get();
-        if (curator != null && ZooKeeperUtils.exists(curator, path) != null) {
+        if (curator != null && ZooKeeperUtils.exists(curator, path)) {
             LOGGER.info("Unregister API at " + path);
             ZooKeeperUtils.deleteSafe(curator, path);
         }

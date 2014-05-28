@@ -55,6 +55,7 @@ import static io.fabric8.zookeeper.ZkPath.CONTAINER_LOCAL_IP;
 import static io.fabric8.zookeeper.ZkPath.CONTAINER_PORT_MAX;
 import static io.fabric8.zookeeper.ZkPath.CONTAINER_PORT_MIN;
 import static io.fabric8.zookeeper.ZkPath.CONTAINER_RESOLVER;
+import static io.fabric8.zookeeper.utils.ZooKeeperUtils.exists;
 
 @ThreadSafe
 @Component(name = "io.fabric8.container.registration.embedded", label = "Fabric8 Embedded Registration", immediate = true, metatype = false)
@@ -98,8 +99,7 @@ public class EmbeddedContainerRegistration extends AbstractComponent implements 
             checkAlive();
 
             String domainsNode = CONTAINER_DOMAINS.getPath(karafName);
-            Stat stat = ZooKeeperUtils.exists(curator.get(), domainsNode);
-            if (stat != null) {
+            if (exists(curator.get(), domainsNode)) {
                 ZooKeeperUtils.deleteSafe(curator.get(), domainsNode);
             }
 
@@ -113,7 +113,7 @@ public class EmbeddedContainerRegistration extends AbstractComponent implements 
             //Mostly usable for adding values when creating containers without an existing ensemble.
             for (String resolver : ZkDefs.VALID_RESOLVERS) {
                 String address = sysprops.getProperty(resolver);
-                if (address != null && !address.isEmpty() && ZooKeeperUtils.exists(curator.get(), CONTAINER_ADDRESS.getPath(karafName, resolver)) == null) {
+                if (address != null && !address.isEmpty() && !ZooKeeperUtils.exists(curator.get(), CONTAINER_ADDRESS.getPath(karafName, resolver))) {
                     ZooKeeperUtils.setData(curator.get(), CONTAINER_ADDRESS.getPath(karafName, resolver), address);
                 }
             }
@@ -148,7 +148,7 @@ public class EmbeddedContainerRegistration extends AbstractComponent implements 
         RuntimeProperties sysprops = runtimeProperties.get();
         String karafName = sysprops.getProperty(SystemProperties.KARAF_NAME);
         String nodeAlive = CONTAINER_ALIVE.getPath(karafName);
-        Stat stat = ZooKeeperUtils.exists(curator.get(), nodeAlive);
+        Stat stat = ZooKeeperUtils.getStat(curator.get(), nodeAlive);
         if (stat != null) {
             if (stat.getEphemeralOwner() != curator.get().getZookeeperClient().getZooKeeper().getSessionId()) {
                 ZooKeeperUtils.delete(curator.get(), nodeAlive);
@@ -166,7 +166,7 @@ public class EmbeddedContainerRegistration extends AbstractComponent implements 
     private String getGlobalResolutionPolicy(RuntimeProperties sysprops, CuratorFramework zooKeeper) throws Exception {
         String policy = ZkDefs.LOCAL_HOSTNAME;
         List<String> validResolverList = Arrays.asList(ZkDefs.VALID_RESOLVERS);
-        if (ZooKeeperUtils.exists(zooKeeper, ZkPath.POLICIES.getPath(ZkDefs.RESOLVER)) != null) {
+        if (exists(zooKeeper, ZkPath.POLICIES.getPath(ZkDefs.RESOLVER))) {
             policy = ZooKeeperUtils.getStringData(zooKeeper, ZkPath.POLICIES.getPath(ZkDefs.RESOLVER));
         } else if (sysprops.getProperty(ZkDefs.GLOBAL_RESOLVER_PROPERTY) != null && validResolverList.contains(sysprops.getProperty(ZkDefs.GLOBAL_RESOLVER_PROPERTY))) {
             policy = sysprops.getProperty(ZkDefs.GLOBAL_RESOLVER_PROPERTY);
@@ -181,7 +181,7 @@ public class EmbeddedContainerRegistration extends AbstractComponent implements 
     private String getContainerResolutionPolicy(RuntimeProperties sysprops, CuratorFramework zooKeeper, String container) throws Exception {
         String policy = null;
         List<String> validResolverList = Arrays.asList(ZkDefs.VALID_RESOLVERS);
-        if (ZooKeeperUtils.exists(zooKeeper, CONTAINER_RESOLVER.getPath(container)) != null) {
+        if (exists(zooKeeper, CONTAINER_RESOLVER.getPath(container))) {
             policy = ZooKeeperUtils.getStringData(zooKeeper, CONTAINER_RESOLVER.getPath(container));
         } else if (sysprops.getProperty(ZkDefs.LOCAL_RESOLVER_PROPERTY) != null && validResolverList.contains(sysprops.getProperty(ZkDefs.LOCAL_RESOLVER_PROPERTY))) {
             policy = sysprops.getProperty(ZkDefs.LOCAL_RESOLVER_PROPERTY);
@@ -191,7 +191,7 @@ public class EmbeddedContainerRegistration extends AbstractComponent implements 
             policy = getGlobalResolutionPolicy(sysprops, zooKeeper);
         }
 
-        if (policy != null && ZooKeeperUtils.exists(zooKeeper, CONTAINER_RESOLVER.getPath(container)) == null) {
+        if (policy != null && !ZooKeeperUtils.exists(zooKeeper, CONTAINER_RESOLVER.getPath(container))) {
             ZooKeeperUtils.setData(zooKeeper, CONTAINER_RESOLVER.getPath(container), policy);
         }
         return policy;

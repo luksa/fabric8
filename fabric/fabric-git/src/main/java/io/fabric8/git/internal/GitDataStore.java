@@ -849,7 +849,7 @@ public class GitDataStore extends AbstractDataStore<GitDataStore> {
     public String getDefaultJvmOptions() {
         assertValid();
         try {
-            if (getCurator().getZookeeperClient().isConnected() && exists(getCurator(), JVM_OPTIONS_PATH) != null) {
+            if (getCurator().getZookeeperClient().isConnected() && exists(getCurator(), JVM_OPTIONS_PATH)) {
                 return getStringData(getTreeCache(), JVM_OPTIONS_PATH);
             } else {
                 return "";

@@ -526,7 +526,7 @@ public final class FabricServiceImpl extends AbstractComponent implements Fabric
         assertValid();
         URI uri = URI.create(getDefaultRepo());
         try {
-            if (exists(curator.get(), ZkPath.MAVEN_PROXY.getPath("download")) != null) {
+            if (exists(curator.get(), ZkPath.MAVEN_PROXY.getPath("download"))) {
                 List<String> children = getChildren(curator.get(), ZkPath.MAVEN_PROXY.getPath("download"));
                 if (children != null && !children.isEmpty()) {
                     Collections.sort(children);
@@ -549,7 +549,7 @@ public final class FabricServiceImpl extends AbstractComponent implements Fabric
         assertValid();
         try {
             List<URI> uris = new ArrayList<URI>();
-            if (exists(curator.get(), ZkPath.MAVEN_PROXY.getPath("download")) != null) {
+            if (exists(curator.get(), ZkPath.MAVEN_PROXY.getPath("download"))) {
                 List<String> children = getChildren(curator.get(), ZkPath.MAVEN_PROXY.getPath("download"));
                 if (children != null && !children.isEmpty()) {
                     Collections.sort(children);
@@ -575,7 +575,7 @@ public final class FabricServiceImpl extends AbstractComponent implements Fabric
         assertValid();
         URI uri = URI.create(getDefaultRepo());
         try {
-            if (exists(curator.get(), ZkPath.MAVEN_PROXY.getPath("upload")) != null) {
+            if (exists(curator.get(), ZkPath.MAVEN_PROXY.getPath("upload"))) {
                 List<String> children = getChildren(curator.get(), ZkPath.MAVEN_PROXY.getPath("upload"));
                 if (children != null && !children.isEmpty()) {
                     Collections.sort(children);
@@ -606,7 +606,7 @@ public final class FabricServiceImpl extends AbstractComponent implements Fabric
 
     private String containerWebAppUrl(String versionsPath, String name) {
         try {
-            if (exists(curator.get(), versionsPath) != null) {
+            if (exists(curator.get(), versionsPath)) {
                 List<String> children = getChildren(curator.get(), versionsPath);
                 if (children != null && !children.isEmpty()) {
                     for (String child : children) {

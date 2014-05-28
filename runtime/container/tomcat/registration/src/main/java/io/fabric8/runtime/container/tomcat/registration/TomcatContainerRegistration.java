@@ -126,8 +126,7 @@ public final class TomcatContainerRegistration extends AbstractComponent impleme
             checkAlive();
 
             String domainsNode = CONTAINER_DOMAINS.getPath(karafName);
-            Stat stat = ZooKeeperUtils.exists(curator.get(), domainsNode);
-            if (stat != null) {
+            if (ZooKeeperUtils.exists(curator.get(), domainsNode)) {
                 ZooKeeperUtils.deleteSafe(curator.get(), domainsNode);
             }
 
@@ -142,7 +141,7 @@ public final class TomcatContainerRegistration extends AbstractComponent impleme
             for (String resolver : ZkDefs.VALID_RESOLVERS) {
                 String address = sysprops.getProperty(resolver);
                 String path = CONTAINER_ADDRESS.getPath(karafName, resolver);
-                if (address != null && !address.isEmpty() && ZooKeeperUtils.exists(curator.get(), path) == null) {
+                if (address != null && !address.isEmpty() && !ZooKeeperUtils.exists(curator.get(), path)) {
                     ZooKeeperUtils.setData(curator.get(), path, address);
                 }
             }
@@ -177,7 +176,7 @@ public final class TomcatContainerRegistration extends AbstractComponent impleme
 
     private void checkAlive() throws Exception {
         String nodeAlive = CONTAINER_ALIVE.getPath(getKarafName());
-        Stat stat = ZooKeeperUtils.exists(curator.get(), nodeAlive);
+        Stat stat = ZooKeeperUtils.getStat(curator.get(), nodeAlive);
         if (stat != null) {
             if (stat.getEphemeralOwner() != curator.get().getZookeeperClient().getZooKeeper().getSessionId()) {
                 ZooKeeperUtils.delete(curator.get(), nodeAlive);
@@ -259,7 +258,7 @@ public final class TomcatContainerRegistration extends AbstractComponent impleme
         String policy = ZkDefs.LOCAL_HOSTNAME;
         List<String> validResolverList = Arrays.asList(ZkDefs.VALID_RESOLVERS);
         String resolverPolicyPath = ZkPath.POLICIES.getPath(ZkDefs.RESOLVER);
-        if (ZooKeeperUtils.exists(zooKeeper, resolverPolicyPath) != null) {
+        if (ZooKeeperUtils.exists(zooKeeper, resolverPolicyPath)) {
             policy = ZooKeeperUtils.getStringData(zooKeeper, resolverPolicyPath);
         } else {
             String globalResolver = sysprops.getProperty(ZkDefs.GLOBAL_RESOLVER_PROPERTY);
@@ -278,7 +277,7 @@ public final class TomcatContainerRegistration extends AbstractComponent impleme
         String policy = null;
         List<String> validResolverList = Arrays.asList(ZkDefs.VALID_RESOLVERS);
         String path = CONTAINER_RESOLVER.getPath(container);
-        if (ZooKeeperUtils.exists(zooKeeper, path) != null) {
+        if (ZooKeeperUtils.exists(zooKeeper, path)) {
             policy = ZooKeeperUtils.getStringData(zooKeeper, path);
         } else {
             String localResolver = sysprops.getProperty(ZkDefs.LOCAL_RESOLVER_PROPERTY);
@@ -291,7 +290,7 @@ public final class TomcatContainerRegistration extends AbstractComponent impleme
             policy = getGlobalResolutionPolicy(sysprops, zooKeeper);
         }
 
-        if (policy != null && ZooKeeperUtils.exists(zooKeeper, path) == null) {
+        if (policy != null && !ZooKeeperUtils.exists(zooKeeper, path)) {
             ZooKeeperUtils.setData(zooKeeper, path, policy);
         }
         return policy;

@@ -16,7 +16,7 @@
 package io.fabric8.itests.basic.examples;
 
 
-import static io.fabric8.zookeeper.utils.ZooKeeperUtils.exists;
+import static io.fabric8.zookeeper.utils.ZooKeeperUtils.getStat;
 import static io.fabric8.zookeeper.utils.ZooKeeperUtils.getChildren;
 import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.editConfigurationFilePut;
 import io.fabric8.api.Container;
@@ -85,7 +85,7 @@ public class ExampleCamelClusterTest extends FabricTestSupport {
                 System.err.println(executeCommand("fabric:profile-display --overlay fabric-camel-server"));
 
                 //Check that the entries have been properly propagated.
-                Assert.assertNotNull(exists(curator, "/fabric/registry/camel/endpoints"));
+                Assert.assertTrue(exists(curator, "/fabric/registry/camel/endpoints"));
                 Assert.assertEquals(1, getChildren(curator, "/fabric/registry/camel/endpoints").size());
 
                 Assert.assertTrue(Provision.waitForCondition(Arrays.asList(client), new ContainerCondition() {

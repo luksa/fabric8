@@ -102,12 +102,12 @@ public class ZooKeeperFacade implements ZooKeeperFacadeMXBean {
 
     public ZkContents read(String path, boolean escape) throws Exception {
         CuratorFramework curator = getCurator();
-        Stat exists = exists(curator, path);
-        if (exists == null) {
+        Stat stat = getStat(curator, path);
+        if (stat == null) {
             return null;
         }
-        int numChildren = exists.getNumChildren();
-        int dataLength = exists.getDataLength();
+        int numChildren = stat.getNumChildren();
+        int dataLength = stat.getDataLength();
         List<String> children = null;
         String data = null;
         if (numChildren > 0) {

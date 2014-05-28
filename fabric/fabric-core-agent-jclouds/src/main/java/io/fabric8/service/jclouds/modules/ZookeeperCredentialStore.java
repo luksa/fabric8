@@ -177,7 +177,7 @@ public final class ZookeeperCredentialStore extends CredentialStore implements C
             int size = 0;
             {
                 try {
-                    if (exists(curator, ZkPath.CLOUD_NODES.getPath()) != null) {
+                    if (exists(curator, ZkPath.CLOUD_NODES.getPath())) {
                         size = getChildren(curator, ZkPath.CLOUD_NODES.getPath()).size();
                     }
                 } catch (Exception ex) {
@@ -199,7 +199,7 @@ public final class ZookeeperCredentialStore extends CredentialStore implements C
             //If not found in the cache check the zookeeper if available.
             if (!result) {
                 try {
-                    result = (exists(curator, ZkPath.CLOUD_NODE.getPath(normalizeKey(o))) != null);
+                    result = (exists(curator, ZkPath.CLOUD_NODE.getPath(normalizeKey(o))));
                 } catch (Exception ex) {
                     //noop
                 }

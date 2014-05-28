@@ -110,7 +110,7 @@ public final class CloudProviderBridge extends AbstractComponent implements Conn
                         String identity = properties.get(Constants.IDENTITY) != null ? String.valueOf(properties.get(Constants.IDENTITY)) : null;
                         String credential = properties.get(Constants.CREDENTIAL) != null ? String.valueOf(properties.get(Constants.CREDENTIAL)) : null;
                         if (name != null && identity != null && credential != null && curator.get().getZookeeperClient().isConnected()) {
-                            if (exists(curator.get(), ZkPath.CLOUD_SERVICE.getPath(name)) == null) {
+                            if (!exists(curator.get(), ZkPath.CLOUD_SERVICE.getPath(name))) {
                                 create(curator.get(), ZkPath.CLOUD_SERVICE.getPath(name));
 
                                 Enumeration keys = properties.keys();

@@ -76,6 +76,7 @@ import static io.fabric8.zookeeper.utils.ZooKeeperUtils.createDefault;
 import static io.fabric8.zookeeper.utils.ZooKeeperUtils.delete;
 import static io.fabric8.zookeeper.utils.ZooKeeperUtils.deleteSafe;
 import static io.fabric8.zookeeper.utils.ZooKeeperUtils.exists;
+import static io.fabric8.zookeeper.utils.ZooKeeperUtils.getStat;
 import static io.fabric8.zookeeper.utils.ZooKeeperUtils.getStringData;
 import static io.fabric8.zookeeper.utils.ZooKeeperUtils.getSubstitutedPath;
 import static io.fabric8.zookeeper.utils.ZooKeeperUtils.setData;
@@ -145,8 +146,7 @@ public final class KarafContainerRegistration extends AbstractComponent implemen
             checkAlive();
 
             String domainsNode = CONTAINER_DOMAINS.getPath(karafName);
-            Stat stat = exists(curator.get(), domainsNode);
-            if (stat != null) {
+            if (exists(curator.get(), domainsNode)) {
                 deleteSafe(curator.get(), domainsNode);
             }
 
@@ -160,7 +160,7 @@ public final class KarafContainerRegistration extends AbstractComponent implemen
             //Mostly usable for adding values when creating containers without an existing ensemble.
             for (String resolver : ZkDefs.VALID_RESOLVERS) {
                 String address = sysprops.getProperty(resolver);
-                if (address != null && !address.isEmpty() && exists(curator.get(), CONTAINER_ADDRESS.getPath(karafName, resolver)) == null) {
+                if (address != null && !address.isEmpty() && !exists(curator.get(), CONTAINER_ADDRESS.getPath(karafName, resolver))) {
                     setData(curator.get(), CONTAINER_ADDRESS.getPath(karafName, resolver), address);
                 }
             }
@@ -203,7 +203,7 @@ public final class KarafContainerRegistration extends AbstractComponent implemen
         RuntimeProperties sysprops = runtimeProperties.get();
         String karafName = sysprops.getProperty(SystemProperties.KARAF_NAME);
         String nodeAlive = CONTAINER_ALIVE.getPath(karafName);
-        Stat stat = exists(curator.get(), nodeAlive);
+        Stat stat = getStat(curator.get(), nodeAlive);
         if (stat != null) {
             if (stat.getEphemeralOwner() != curator.get().getZookeeperClient().getZooKeeper().getSessionId()) {
                 delete(curator.get(), nodeAlive);
@@ -414,7 +414,7 @@ public final class KarafContainerRegistration extends AbstractComponent implemen
     private String getGlobalResolutionPolicy(RuntimeProperties sysprops, CuratorFramework zooKeeper) throws Exception {
         String policy = ZkDefs.LOCAL_HOSTNAME;
         List<String> validResolverList = Arrays.asList(ZkDefs.VALID_RESOLVERS);
-        if (exists(zooKeeper, ZkPath.POLICIES.getPath(ZkDefs.RESOLVER)) != null) {
+        if (exists(zooKeeper, ZkPath.POLICIES.getPath(ZkDefs.RESOLVER))) {
             policy = getStringData(zooKeeper, ZkPath.POLICIES.getPath(ZkDefs.RESOLVER));
         } else if (sysprops.getProperty(ZkDefs.GLOBAL_RESOLVER_PROPERTY) != null && validResolverList.contains(sysprops.getProperty(ZkDefs.GLOBAL_RESOLVER_PROPERTY))) {
             policy = sysprops.getProperty(ZkDefs.GLOBAL_RESOLVER_PROPERTY);
@@ -429,7 +429,7 @@ public final class KarafContainerRegistration extends AbstractComponent implemen
     private String getContainerResolutionPolicy(RuntimeProperties sysprops, CuratorFramework zooKeeper, String container) throws Exception {
         String policy = null;
         List<String> validResolverList = Arrays.asList(ZkDefs.VALID_RESOLVERS);
-        if (exists(zooKeeper, ZkPath.CONTAINER_RESOLVER.getPath(container)) != null) {
+        if (exists(zooKeeper, ZkPath.CONTAINER_RESOLVER.getPath(container))) {
             policy = getStringData(zooKeeper, ZkPath.CONTAINER_RESOLVER.getPath(container));
         } else if (sysprops.getProperty(ZkDefs.LOCAL_RESOLVER_PROPERTY) != null && validResolverList.contains(sysprops.getProperty(ZkDefs.LOCAL_RESOLVER_PROPERTY))) {
             policy = sysprops.getProperty(ZkDefs.LOCAL_RESOLVER_PROPERTY);
@@ -439,7 +439,7 @@ public final class KarafContainerRegistration extends AbstractComponent implemen
             policy = getGlobalResolutionPolicy(sysprops, zooKeeper);
         }
 
-        if (policy != null && exists(zooKeeper, ZkPath.CONTAINER_RESOLVER.getPath(container)) == null) {
+        if (policy != null && !exists(zooKeeper, ZkPath.CONTAINER_RESOLVER.getPath(container))) {
             setData(zooKeeper, ZkPath.CONTAINER_RESOLVER.getPath(container), policy);
         }
         return policy;

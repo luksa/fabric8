@@ -53,10 +53,10 @@ public class EncryptAction extends AbstractAction {
 
     @Override
     protected Object doExecute() throws Exception {
-        if (exists(getCurator(), ZkPath.AUTHENTICATION_CRYPT_ALGORITHM.getPath()) == null) {
+        if (!exists(getCurator(), ZkPath.AUTHENTICATION_CRYPT_ALGORITHM.getPath())) {
             System.out.println("No encryption algorithm found in the registry.");
             return null;
-        } else if (exists(getCurator(), ZkPath.AUTHENTICATION_CRYPT_PASSWORD.getPath()) == null) {
+        } else if (!exists(getCurator(), ZkPath.AUTHENTICATION_CRYPT_PASSWORD.getPath())) {
             System.out.println("No encryption master password found in the registry.");
             return null;
         } else {

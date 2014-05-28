@@ -202,7 +202,7 @@ final class JoinAction extends AbstractAction {
             curator = builder.build();
             curator.start();
             curator.getZookeeperClient().blockUntilConnectedOrTimedOut();
-            exists = exists(curator, ZkPath.CONTAINER.getPath(name)) != null;
+            exists = exists(curator, ZkPath.CONTAINER.getPath(name));
             if (!exists || force) {
                 ZkPath.createContainerPaths(curator, containerName, version, profile);
             }

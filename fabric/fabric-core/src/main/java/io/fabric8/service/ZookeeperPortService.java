@@ -126,7 +126,7 @@ public final class ZookeeperPortService extends AbstractComponent implements Por
         String ipPortsPath = ZkPath.PORTS_IP.getPath(container.getIp());
         try {
             if (interProcessLock.acquire(60, TimeUnit.SECONDS)) {
-                if (exists(curator.get(), containerPortsPidKeyPath) != null) {
+                if (exists(curator.get(), containerPortsPidKeyPath)) {
                     int port = lookupPort(container, pid, key);
                     deleteSafe(curator.get(), containerPortsPidKeyPath);
 
@@ -160,7 +160,7 @@ public final class ZookeeperPortService extends AbstractComponent implements Por
         String containerPortsPidPath = ZkPath.PORTS_CONTAINER_PID.getPath(container.getId(), pid);
         try {
             if (interProcessLock.acquire(60, TimeUnit.SECONDS)) {
-                if (exists(curator.get(), containerPortsPidPath) != null) {
+                if (exists(curator.get(), containerPortsPidPath)) {
                     for (String key : getChildren(curator.get(), containerPortsPidPath)) {
                         unregisterPort(container, pid, key);
                     }
@@ -182,7 +182,7 @@ public final class ZookeeperPortService extends AbstractComponent implements Por
         String containerPortsPath = ZkPath.PORTS_CONTAINER.getPath(container.getId());
         try {
             if (interProcessLock.acquire(60, TimeUnit.SECONDS)) {
-                if (exists(curator.get(), containerPortsPath) != null) {
+                if (exists(curator.get(), containerPortsPath)) {
                     for (String pid : getChildren(curator.get(), containerPortsPath)) {
                         unregisterPort(container, pid);
                     }
@@ -204,7 +204,7 @@ public final class ZookeeperPortService extends AbstractComponent implements Por
         int port = 0;
         String path = ZkPath.PORTS_CONTAINER_PID_KEY.getPath(container.getId(), pid, key);
         try {
-            if (exists(curator.get(), path) != null) {
+            if (exists(curator.get(), path)) {
                 port = Integer.parseInt(getStringData(curator.get(), path));
             }
         } catch (Exception ex) {
@@ -220,7 +220,7 @@ public final class ZookeeperPortService extends AbstractComponent implements Por
         String path = ZkPath.PORTS_CONTAINER.getPath(container.getId());
         try {
             if (interProcessLock.acquire(60, TimeUnit.SECONDS)) {
-                if (exists(curator.get(), path) != null) {
+                if (exists(curator.get(), path)) {
 
                     for (String pid : getChildren(curator.get(), path)) {
                         for (String key : getChildren(curator.get(), ZkPath.PORTS_CONTAINER_PID.getPath(container.getId(), pid))) {

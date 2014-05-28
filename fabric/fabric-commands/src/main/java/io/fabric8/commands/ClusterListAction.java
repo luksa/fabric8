@@ -68,7 +68,7 @@ public class ClusterListAction extends AbstractAction {
 
     protected void printCluster(String dir, PrintStream out) throws Exception {
         // do we have any clusters at all?
-        if (exists(getCurator(), dir) == null) {
+        if (!exists(getCurator(), dir)) {
             return;
         }
         List<String> children = getAllChildren(getCurator(), dir);

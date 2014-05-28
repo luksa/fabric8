@@ -254,7 +254,11 @@ public final class ZooKeeperUtils {
         curator.delete().forPath(path);
     }
 
-    public static Stat exists(CuratorFramework curator, String path) throws Exception {
+    public static boolean exists(CuratorFramework curator, String path) throws Exception {
+        return getStat(curator, path) != null;
+    }
+
+    public static Stat getStat(CuratorFramework curator, String path) throws Exception {
         return curator.checkExists().forPath(path);
     }
 
@@ -350,7 +354,7 @@ public final class ZooKeeperUtils {
 
     public static String getSubstitutedPath(final CuratorFramework curator, String path) throws Exception {
         String normalized = path != null && path.contains("#") ? path.substring(0, path.lastIndexOf('#')) : path;
-        if (normalized != null && exists(curator, normalized) != null) {
+        if (normalized != null && exists(curator, normalized)) {
             byte[] data = ZkPath.loadURL(curator, path);
             if (data != null && data.length > 0) {
                 String str = new String(ZkPath.loadURL(curator, path), "UTF-8");
@@ -408,7 +412,7 @@ public final class ZooKeeperUtils {
         long lastModified = 0;
         List<String> children = getChildren(curator, path);
         if (children.isEmpty()) {
-            return exists(curator, path).getMtime();
+            return getStat(curator, path).getMtime();
         } else {
             for (String child : children) {
                 lastModified = Math.max(lastModified(curator, path + "/" + child), lastModified);
@@ -428,7 +432,7 @@ public final class ZooKeeperUtils {
 
     public static Properties getContainerTokens(CuratorFramework curator) throws Exception {
         Properties props = new Properties();
-        if (exists(curator, CONTAINERS_NODE) != null) {
+        if (exists(curator, CONTAINERS_NODE)) {
             for (String key : getChildren(curator, CONTAINERS_NODE)) {
                 props.setProperty("container#" + key, getStringData(curator, CONTAINERS_NODE + "/" + key));
             }
