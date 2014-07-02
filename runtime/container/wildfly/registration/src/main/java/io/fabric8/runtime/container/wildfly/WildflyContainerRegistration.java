@@ -130,11 +130,7 @@ public final class WildflyContainerRegistration extends AbstractComponent implem
 
             checkAlive();
 
-            String domainsNode = CONTAINER_DOMAINS.getPath(runtimeIdentity);
-            Stat stat = ZooKeeperUtils.exists(curator.get(), domainsNode);
-            if (stat != null) {
-                ZooKeeperUtils.deleteSafe(curator.get(), domainsNode);
-            }
+            ZooKeeperUtils.deleteSafe(curator.get(), CONTAINER_DOMAINS.getPath(runtimeIdentity));
 
             ZooKeeperUtils.createDefault(curator.get(), CONTAINER_BINDADDRESS.getPath(runtimeIdentity), bootstrapConfiguration.get().getBindAddress());
             ZooKeeperUtils.createDefault(curator.get(), CONTAINER_RESOLVER.getPath(runtimeIdentity), getContainerResolutionPolicy(curator.get(), runtimeIdentity));

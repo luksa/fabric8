@@ -96,11 +96,7 @@ public class EmbeddedContainerRegistration extends AbstractComponent implements 
 
             checkAlive();
 
-            String domainsNode = CONTAINER_DOMAINS.getPath(karafName);
-            Stat stat = ZooKeeperUtils.exists(curator.get(), domainsNode);
-            if (stat != null) {
-                ZooKeeperUtils.deleteSafe(curator.get(), domainsNode);
-            }
+            ZooKeeperUtils.deleteSafe(curator.get(), CONTAINER_DOMAINS.getPath(karafName));
 
             ZooKeeperUtils.createDefault(curator.get(), CONTAINER_BINDADDRESS.getPath(karafName), sysprops.getProperty(ZkDefs.BIND_ADDRESS, "0.0.0.0"));
             ZooKeeperUtils.createDefault(curator.get(), CONTAINER_RESOLVER.getPath(karafName), getContainerResolutionPolicy(sysprops, curator.get(), karafName));

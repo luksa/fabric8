@@ -154,11 +154,7 @@ public final class KarafContainerRegistration extends AbstractComponent implemen
 
             checkAlive();
 
-            String domainsNode = CONTAINER_DOMAINS.getPath(runtimeIdentity);
-            Stat stat = exists(curator.get(), domainsNode);
-            if (stat != null) {
-                deleteSafe(curator.get(), domainsNode);
-            }
+            deleteSafe(curator.get(), CONTAINER_DOMAINS.getPath(runtimeIdentity));
 
             boolean openshiftEnv = Strings.notEmpty(System.getenv("OPENSHIFT_FUSE_DIR"));
 
