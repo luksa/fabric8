@@ -253,11 +253,7 @@ public final class TomcatContainerRegistration extends AbstractComponent impleme
     }
 
     private int getHttpPort() {
-        int port = DEFAULT_HTTP_PORT;
-        for (Connector connector : httpConnectors) {
-            return connector.getPort();
-        }
-        return port;
+        return httpConnectors.isEmpty() ? DEFAULT_HTTP_PORT : httpConnectors.iterator().next().getPort();
     }
 
     private String getHttpUrl(String protocol, String name, int httpConnectionPort) throws IOException, KeeperException, InterruptedException {
@@ -265,11 +261,7 @@ public final class TomcatContainerRegistration extends AbstractComponent impleme
     }
 
     private int getHttpsPort() throws KeeperException, InterruptedException, IOException {
-        int port = DEFAULT_HTTPS_PORT;
-        for (Connector connector : httpsConnectors) {
-            return connector.getPort();
-        }
-        return port;
+        return httpsConnectors.isEmpty() ? DEFAULT_HTTPS_PORT : httpsConnectors.iterator().next().getPort();
     }
 
 
