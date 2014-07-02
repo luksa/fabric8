@@ -43,6 +43,7 @@
         <module name="com.fasterxml.jackson.core.jackson-core"/>
         <module name="com.fasterxml.jackson.core.jackson-databind"/>
         <module name="com.google.guava"/>
+        <module name="org.apache.commons.beanutils"/>
         <module name="org.apache.karaf"/>
         <module name="org.apache.log4j"/>
         <module name="org.codehaus.jackson.jackson-mapper-asl"/>
