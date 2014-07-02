@@ -104,6 +104,7 @@
         </fileset>
     </copy>
     <copy todir="${wildfly.patch.dir}/modules/org/wildfly/extension/fabric/main" overwrite="true">
+        <fileset file="${deploy.artifacts.lib}/fabric-runtime-container-agent-${project.version}.jar" />
         <fileset file="${deploy.artifacts.lib}/fabric-runtime-container-wildfly-extension-${project.version}.jar" />
         <fileset file="${deploy.artifacts.lib}/fabric-runtime-container-wildfly-registration-${project.version}.jar" />
     </copy>
