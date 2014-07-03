@@ -30,6 +30,7 @@
         <resource-root path="fabric-git-@project.version@.jar"/>
         <resource-root path="fabric-groups-@project.version@.jar"/>
         <resource-root path="fabric-jaas-@project.version@.jar"/>
+        <resource-root path="fabric-runtime-container-agent-@project.version@.jar"/>
         <resource-root path="fabric-utils-@project.version@.jar"/>
         <resource-root path="fabric-zookeeper-@project.version@.jar"/>
         <resource-root path="jasypt-@jasypt.version@.jar"/>
@@ -44,10 +45,12 @@
         <module name="com.fasterxml.jackson.core.jackson-databind"/>
         <module name="com.google.guava"/>
         <module name="org.apache.commons.beanutils"/>
+        <module name="org.apache.commons.logging"/>
         <module name="org.apache.karaf"/>
         <module name="org.apache.log4j"/>
         <module name="org.codehaus.jackson.jackson-mapper-asl"/>
         <module name="org.jboss.gravia"/>
+        <module name="org.jboss.shrinkwrap.core" services="import"/>
         <module name="org.osgi.enterprise"/>
         <module name="org.osgi.core"/>
         <module name="org.slf4j"/>

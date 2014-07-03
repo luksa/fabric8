@@ -24,7 +24,6 @@
     </properties>
 
     <resources>
-        <resource-root path="fabric-runtime-container-agent-@project.version@.jar"/>
         <resource-root path="fabric-runtime-container-wildfly-extension-@project.version@.jar"/>
         <resource-root path="fabric-runtime-container-wildfly-registration-@project.version@.jar"/>
     </resources>
@@ -39,7 +38,7 @@
         <module name="org.jboss.gravia"/>
         <module name="org.jboss.modules"/>
         <module name="org.jboss.msc"/>
-        <module name="org.jboss.shrinkwrap.core" services="import"/>
+        <module name="org.jboss.shrinkwrap.core"/>
         <module name="org.jboss.staxmapper"/>
         <module name="org.osgi.core"/>
         <module name="org.osgi.enterprise"/>
