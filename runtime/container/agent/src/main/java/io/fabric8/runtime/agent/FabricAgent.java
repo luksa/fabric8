@@ -338,15 +338,9 @@ public class FabricAgent extends AbstractComponent implements FabricAgentMXBean 
                 ResourceIdentity identity = resource.getIdentity();
                 Resource oldResource = installedResources.remove(identity);
                 if (oldResource == null && !resourcehandleMap.containsKey(identity)) {
-                    if (isShared) {
-                        // TODO lest not deploy shared stuff for now since bundles throw an exception when trying to stop them
-                        // which breaks the tests ;)
-                        LOGGER.debug("TODO not installing " + (isShared ? "shared" : "non-shared") + " resource: " + identity);
-                    } else {
-                        LOGGER.info("Installing " + (isShared ? "shared" : "non-shared") + " resource: " + identity);
-                        resourcesToInstall.add(resource);
-                        resourceUrisInstalled.add(name);
-                    }
+                    LOGGER.info("Installing " + (isShared ? "shared" : "non-shared") + " resource: " + identity);
+                    resourcesToInstall.add(resource);
+                    resourceUrisInstalled.add(name);
                 }
             }
         }
