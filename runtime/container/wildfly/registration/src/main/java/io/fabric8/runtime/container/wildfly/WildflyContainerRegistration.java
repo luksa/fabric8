@@ -17,6 +17,7 @@ package io.fabric8.runtime.container.wildfly;
 
 import io.fabric8.api.Container;
 import io.fabric8.api.ContainerRegistration;
+import io.fabric8.api.EnvironmentVariables;
 import io.fabric8.api.FabricException;
 import io.fabric8.api.FabricService;
 import io.fabric8.api.GeoLocationService;
@@ -136,6 +137,8 @@ public final class WildflyContainerRegistration extends AbstractComponent implem
             ZooKeeperUtils.createDefault(curator.get(), CONTAINER_RESOLVER.getPath(runtimeIdentity), getContainerResolutionPolicy(curator.get(), runtimeIdentity));
             ZooKeeperUtils.setData(curator.get(), CONTAINER_LOCAL_HOSTNAME.getPath(runtimeIdentity), HostUtils.getLocalHostName());
             ZooKeeperUtils.setData(curator.get(), CONTAINER_LOCAL_IP.getPath(runtimeIdentity), HostUtils.getLocalIp());
+            ZooKeeperUtils.setData(curator.get(), CONTAINER_MANUAL_IP.getPath(runtimeIdentity), System.getenv(EnvironmentVariables.FABRIC8_MANUALIP));
+            // ZooKeeperUtils.setData(curator.get(), CONTAINER_IP.getPath(runtimeIdentity), getContainerPointer(curator.get(), runtimeIdentity));
             //Check if there are addresses specified as system properties and use them if there is not an existing value in the registry.
             //Mostly usable for adding values when creating containers without an existing ensemble.
             for (String resolver : ZkDefs.VALID_RESOLVERS) {
