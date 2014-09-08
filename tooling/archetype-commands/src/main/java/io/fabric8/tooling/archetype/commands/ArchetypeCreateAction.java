@@ -64,7 +64,8 @@ public class ArchetypeCreateAction extends AbstractAction {
                 baseDir = target;
                 preferences.put("baseDir", baseDir.getCanonicalPath());
             }
-            String targetDir = new File(baseDir, removeArchetypeSuffix(archetype.artifactId)).getCanonicalPath();
+            target = new File(baseDir, removeArchetypeSuffix(archetype.artifactId));
+            String targetDir = target.getCanonicalPath();
             System.out.println(String.format("Generating %s:%s in %s", archetype.groupId, archetype.artifactId, targetDir));
             File archetypeFile = fetchArchetype(archetype);
             if (archetypeFile == null || !archetypeFile.exists()) {
