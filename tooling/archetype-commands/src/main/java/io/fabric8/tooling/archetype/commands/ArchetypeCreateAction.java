@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.prefs.Preferences;
 
 import io.fabric8.agent.download.DownloadFuture;
 import io.fabric8.agent.download.DownloadManager;
@@ -42,7 +43,7 @@ public class ArchetypeCreateAction extends AbstractAction {
     @Argument(index = 0, name = "archetype", description = "Archetype coordinates", required = true, multiValued = false)
     private String archetypeGAV;
 
-    @Argument(index = 1, name = "target", description = "Target directory where the project will be generated", required = true, multiValued = false)
+    @Argument(index = 1, name = "target", description = "Target directory where the project will be generated", required = false, multiValued = false)
     private File target;
 
     private final ArchetypeService archetypeService;
@@ -55,7 +56,16 @@ public class ArchetypeCreateAction extends AbstractAction {
     protected Object doExecute() throws Exception {
         Archetype archetype = archetypeService.getArchetype(archetypeGAV);
         if (archetype != null) {
-            System.out.println(String.format("Generating %s:%s in %s", archetype.groupId, archetype.artifactId, target.getCanonicalPath()));
+            Preferences preferences = Preferences.userNodeForPackage(getClass());
+            File baseDir;
+            if (target == null) {
+                baseDir = new File(preferences.get("baseDir", "/tmp"));
+            } else {
+                baseDir = target;
+                preferences.put("baseDir", baseDir.getCanonicalPath());
+            }
+            String targetDir = new File(baseDir, removeArchetypeSuffix(archetype.artifactId)).getCanonicalPath();
+            System.out.println(String.format("Generating %s:%s in %s", archetype.groupId, archetype.artifactId, targetDir));
             File archetypeFile = fetchArchetype(archetype);
             if (archetypeFile == null || !archetypeFile.exists()) {
                 System.err.println("No archetype found for \"" + archetypeGAV + "\" coordinates");
@@ -97,6 +107,14 @@ public class ArchetypeCreateAction extends AbstractAction {
             System.err.println("No archetype found for \"" + archetypeGAV + "\" coordinates");
         }
         return null;
+    }
+
+    private String removeArchetypeSuffix(String artifactId) {
+        if (artifactId.endsWith("-archetype")) {
+            return artifactId.substring(0, artifactId.length() - "-archetype".length());
+        } else {
+            return artifactId;
+        }
     }
 
     /**
