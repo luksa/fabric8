@@ -30,7 +30,6 @@
         <resource-root path="fabric-git-@project.version@.jar"/>
         <resource-root path="fabric-groups-@project.version@.jar"/>
         <resource-root path="fabric-jaas-@project.version@.jar"/>
-        <resource-root path="fabric-runtime-container-agent-@project.version@.jar"/>
         <resource-root path="fabric-utils-@project.version@.jar"/>
         <resource-root path="fabric-zookeeper-@project.version@.jar"/>
         <resource-root path="jasypt-@jasypt.version@.jar"/>
