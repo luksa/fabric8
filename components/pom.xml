@@ -34,6 +34,7 @@
     <module>arquillian-fabric8</module>
     <module>console</module>
     <module>docker-api</module>
+    <module>fabric-camel</module>
     <module>fabric-cxf</module>
     <!--
             TODO
@@ -44,6 +45,7 @@
     <module>fabric-groups</module>
     <module>fabric-utils</module>
     <module>fabric-vertx</module>
+    <module>fabric-zookeeper-spring</module>
     <module>gateway-api</module>
     <module>gateway-apiman</module>
     <module>gateway-core</module>
