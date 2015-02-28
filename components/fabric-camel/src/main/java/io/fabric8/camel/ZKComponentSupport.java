@@ -33,6 +33,8 @@ public abstract class ZKComponentSupport extends DefaultComponent implements Cal
     private static final transient Log LOG = LogFactory.getLog(MasterComponent.class);
     private static final String ZOOKEEPER_URL = "zookeeper.url";
     private static final String ZOOKEEPER_URL_ENV = "ZOOKEEPER_URL";
+    private static final String ZOOKEEPER_HOST_ENV = "ZK_CLIENT_SERVICE_HOST";
+    private static final String ZOOKEEPER_PORT_ENV = "ZK_CLIENT_SERVICE_PORT";
     private static final String ZOOKEEPER_PASSWORD = "zookeeper.password";
 
     private ManagedGroupFactory managedGroupFactory;
@@ -113,6 +115,13 @@ public abstract class ZKComponentSupport extends DefaultComponent implements Cal
         String connectString = getZooKeeperUrl();
         if (connectString == null) {
             connectString = System.getenv(ZOOKEEPER_URL_ENV);
+        }
+        if (connectString == null) {
+            String zkHost = System.getenv(ZOOKEEPER_HOST_ENV);
+            if (zkHost != null) {
+                String zkPort = System.getenv(ZOOKEEPER_PORT_ENV);
+                connectString = zkHost + ":" + (zkPort == null ? "2181" : zkPort);
+            }
         }
         if (connectString == null) {
             connectString = System.getProperty(ZOOKEEPER_URL, "localhost:2181");
