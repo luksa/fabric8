@@ -32,6 +32,7 @@ import java.util.concurrent.Callable;
 public abstract class ZKComponentSupport extends DefaultComponent implements Callable<CuratorFramework> {
     private static final transient Log LOG = LogFactory.getLog(MasterComponent.class);
     private static final String ZOOKEEPER_URL = "zookeeper.url";
+    private static final String ZOOKEEPER_URL_ENV = "ZOOKEEPER_URL";
     private static final String ZOOKEEPER_PASSWORD = "zookeeper.password";
 
     private ManagedGroupFactory managedGroupFactory;
@@ -110,6 +111,9 @@ public abstract class ZKComponentSupport extends DefaultComponent implements Cal
 
     public CuratorFramework call() throws Exception {
         String connectString = getZooKeeperUrl();
+        if (connectString == null) {
+            connectString = System.getenv(ZOOKEEPER_URL_ENV);
+        }
         if (connectString == null) {
             connectString = System.getProperty(ZOOKEEPER_URL, "localhost:2181");
         }
